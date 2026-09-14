@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QE Migration System configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seleniumProjectPath", "targetProjectPath", "migrationArtifactsPath", "scope"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "seleniumProjectPath": {
+      "type": "string",
+      "description": "Path to the existing Selenium Java + Cucumber project root, relative to the repo root. Use '.' when this system has been dropped directly into that repo."
+    },
+    "targetProjectPath": {
+      "type": "string",
+      "description": "Path to the Playwright TypeScript target project. Three supported states: (1) doesn't exist yet — the Engineer scaffolds it (see bootstrap.*); (2) an existing Playwright project (your own, or this system's bundled playwright-migrated/) — the Architect reads and adapts to its real structure before planning anything (see skills/target-project-discovery.skill.md); (3) the bundled playwright-migrated/ scaffold, which is just a pre-built instance of case 2."
+    },
+    "migrationArtifactsPath": {
+      "type": "string",
+      "description": "Path to the per-scenario requirements/plan/dev-log/test-report folders."
+    },
+    "docsPath": { "type": "string", "default": "./docs" },
+    "skillsPath": { "type": "string", "default": "./.github/skills" },
+
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cross-session project memory — kept separate from the per-scenario migration/<slug>/ artifacts. See skills/project-memory.skill.md.",
+      "properties": {
+        "componentRegistryPath": {
+          "type": "string",
+          "default": "./docs/component-registry.md",
+          "description": "Living index of every reusable step definition, page object, fixture, and hook that exists in targetProjectPath — kept current in real time so the Architect/Engineer can check for reuse without re-scanning the whole project."
+        },
+        "changelogPath": {
+          "type": "string",
+          "default": "./migration/CHANGELOG.md",
+          "description": "Append-only chronological log, one entry per scenario the Validator signs off as passed."
+        }
+      }
+    },
+
+    "bootstrap": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Controls how the Engineer scaffolds targetProjectPath when it doesn't exist yet. See skills/target-project-bootstrap.skill.md.",
+      "properties": {
+        "autoCreateTargetProject": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, the Engineer scaffolds a full playwright-bdd project at targetProjectPath (package.json, tsconfig.json, playwright.config.ts, folder structure) the first time it needs to implement into a path that has no package.json yet, then runs npm install / npx playwright install. If false, the Engineer stops and asks the user to scaffold it instead."
+        },
+        "playwrightVersion": { "type": "string", "default": "^1.47.0" },
+        "playwrightBddVersion": { "type": "string", "default": "^7.4.0" },
+        "typescriptVersion": { "type": "string", "default": "^5.5.0" }
+      }
+    },
+
+    "framework": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Records the BDD architecture decision so every agent and skill assumes the same target shape without re-deciding it.",
+      "properties": {
+        "style": {
+          "type": "string",
+          "enum": ["playwright-bdd", "plain-playwright"],
+          "default": "playwright-bdd",
+          "description": "'playwright-bdd' (default/recommended) compiles Gherkin .feature files + Cucumber-Expression step definitions into native Playwright tests. 'plain-playwright' generates test()/test.step() specs with no Gherkin layer instead — set automatically by skills/target-project-discovery.skill.md when targetProjectPath is an existing plain Playwright project and the user opts not to add playwright-bdd to it. See skills/plain-playwright-fallback.skill.md for what changes. Don't hand-edit this without also confirming targetProjectPath's real shape matches — it's an architecture fact, not a preference toggle."
+        },
+        "sourceCucumberVersion": {
+          "type": "string",
+          "description": "e.g. 'cucumber-jvm 7.x' — informs the Architect what Java-side step definition/DI conventions to expect."
+        }
+      }
+    },
+
+    "seleniumSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Where the Java-side Cucumber artifacts live, relative to seleniumProjectPath.",
+      "properties": {
+        "featuresDir": { "type": "string", "default": "src/test/resources/features" },
+        "stepDefsDir": { "type": "string", "default": "src/test/java/**/steps" },
+        "hooksDir": { "type": "string", "default": "src/test/java/**/hooks" }
+      }
+    },
+
+    "conventions": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "locatorPreference": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["getByRole", "getByLabel", "getByTestId", "getByText", "getByPlaceholder", "css", "xpath"] }
+        },
+        "allowXPathFallback": { "type": "boolean", "default": true },
+        "hardSleepPolicy": { "type": "string", "enum": ["forbidden", "allowed-with-justification"], "default": "forbidden" },
+        "pageObjectDir": { "type": "string", "default": "pages" },
+        "componentsDir": { "type": "string", "default": "pages/components", "description": "Shared composite UI components (header, nav, a modal) composed into page objects — see the Composite entry in design-patterns-and-solid.skill.md." },
+        "featuresDir": { "type": "string", "default": "features" },
+        "stepsDir": { "type": "string", "default": "steps" },
+        "supportDir": { "type": "string", "default": "steps/support" },
+        "setupDir": { "type": "string", "default": "setup", "description": "Plain (non-BDD) Playwright test files for infrastructure setup, e.g. auth.setup.ts for storage-state authentication reuse." },
+        "testDir": { "type": "string", "default": "tests", "description": "Used only when framework.style is 'plain-playwright' — where generated *.spec.ts files live (featuresDir/stepsDir are unused in that mode)." },
+        "specFileSuffix": { "type": "string", "default": ".spec.ts", "description": "Used only when framework.style is 'plain-playwright'." },
+        "testDataDir": { "type": "string", "default": "utils" },
+        "stepDefinitionStyle": {
+          "type": "string",
+          "enum": ["cucumber-expressions", "regex"],
+          "default": "cucumber-expressions",
+          "description": "Prefer Cucumber Expressions ({string}, {int}, {word}) over regex — closer to what most Cucumber-JVM projects already use, more readable, less error-prone to write."
+        }
+      }
+    },
+
+    "testing": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "flakeCheckRepeats": { "type": "integer", "minimum": 1, "default": 3 },
+        "browsers": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["chromium", "firefox", "webkit"] },
+          "default": ["chromium", "firefox", "webkit"]
+        },
+        "baseUrlEnvVar": { "type": "string", "default": "BASE_URL" },
+        "runFullRegressionOnEachMigration": { "type": "boolean", "default": false }
+      }
+    },
+
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "scenarios"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["explicit"],
+          "default": "explicit",
+          "description": "The only supported mode: agents may only act on scenarios listed in `scenarios`. Hard guardrail, not a default to relax."
+        },
+        "scenarios": {
+          "type": "array",
+          "description": "The authoritative allow-list of Cucumber scenarios this system may touch. Only the Analyst adds entries here (when the user hands it a .feature file/scenario explicitly). Every other agent treats this list as read-only.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["slug", "featureFile", "scenario", "status"],
+            "properties": {
+              "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+              "featureFile": { "type": "string", "description": "Path to the .feature file, relative to seleniumSource.featuresDir." },
+              "scenario": {
+                "type": "string",
+                "description": "Exact Scenario/Scenario Outline name from the .feature file, or \"*\" to mean every scenario currently in that file is in scope."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pending", "requirements-complete", "planned", "implemented", "passed", "failed", "blocked"]
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

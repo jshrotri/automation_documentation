@@ -1,0 +1,5 @@
+# QE Migration System — machine-local overrides, never shared
+.github/migration.config.local.json
+
+# Node (if this system is dropped into a repo without its own root .gitignore)
+node_modules/

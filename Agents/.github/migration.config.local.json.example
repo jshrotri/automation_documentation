@@ -1,0 +1,8 @@
+{
+  "_comment": "Copy this file to migration.config.local.json (gitignored) for machine-specific or personal overrides. Every agent merges this on top of migration.config.json — same shape, only the keys you want to override. Never put the shared scope list here; scope stays in the tracked config so the team sees the same allow-list.",
+
+  "seleniumProjectPath": "C:/absolute/path/to/your/checkout/if/different",
+  "testing": {
+    "browsers": ["chromium"]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "baseUrl": ".",
+    "paths": {
+      "@pages/*": ["pages/*"],
+      "@steps/*": ["steps/*"],
+      "@utils/*": ["utils/*"]
+    }
+  },
+  "include": ["steps/**/*.ts", "pages/**/*.ts", "utils/**/*.ts", "setup/**/*.ts", "playwright.config.ts"],
+  "exclude": [".features-gen"]
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "./migration.config.schema.json",
+
+  "seleniumProjectPath": ".",
+  "targetProjectPath": "./playwright-migrated",
+  "migrationArtifactsPath": "./migration",
+  "docsPath": "./docs",
+  "skillsPath": "./.github/skills",
+
+  "memory": {
+    "componentRegistryPath": "./docs/component-registry.md",
+    "changelogPath": "./migration/CHANGELOG.md"
+  },
+
+  "bootstrap": {
+    "autoCreateTargetProject": true,
+    "playwrightVersion": "^1.47.0",
+    "playwrightBddVersion": "^7.4.0",
+    "typescriptVersion": "^5.5.0"
+  },
+
+  "framework": {
+    "style": "playwright-bdd",
+    "sourceCucumberVersion": "cucumber-jvm 7.x"
+  },
+
+  "seleniumSource": {
+    "featuresDir": "src/test/resources/features",
+    "stepDefsDir": "src/test/java/**/steps",
+    "hooksDir": "src/test/java/**/hooks"
+  },
+
+  "conventions": {
+    "locatorPreference": ["getByRole", "getByLabel", "getByTestId", "getByText", "getByPlaceholder", "css", "xpath"],
+    "allowXPathFallback": true,
+    "hardSleepPolicy": "forbidden",
+    "pageObjectDir": "pages",
+    "componentsDir": "pages/components",
+    "featuresDir": "features",
+    "stepsDir": "steps",
+    "supportDir": "steps/support",
+    "setupDir": "setup",
+    "testDir": "tests",
+    "specFileSuffix": ".spec.ts",
+    "testDataDir": "utils",
+    "stepDefinitionStyle": "cucumber-expressions"
+  },
+
+  "testing": {
+    "flakeCheckRepeats": 3,
+    "browsers": ["chromium", "firefox", "webkit"],
+    "baseUrlEnvVar": "BASE_URL",
+    "runFullRegressionOnEachMigration": false
+  },
+
+  "scope": {
+    "mode": "explicit",
+    "scenarios": []
+  }
+}
